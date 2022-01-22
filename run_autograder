@@ -5,20 +5,13 @@ import os.path
 import sys
 
 SUBMISSION = "/autograder/submission"
-COMPILE = "compile.sh"
-RUN = "run.sh"
-RUN_ALL = "runAll.sh"
 RESULTS = "results.log"
-REPORT = "report.pdf"
-TEAM = "team.txt"
-FILES = [COMPILE, RUN, RUN_ALL, RESULTS, REPORT, TEAM]
 
 GRADESCOPE_RESULTS = "/autograder/results/results.json"
 
 INSTANCE = "Instance"
 RESULT = "Result"
 TIME = "Time"
-SOLUTION = "Solution"
 
 def report_error(msg: str):
     with open(GRADESCOPE_RESULTS, 'w') as output:
@@ -50,5 +43,6 @@ if __name__ == '__main__':
         
     entries.insert(0, {"name": "Total time", "value": total_time, "order": "asc"})
     
+    msg = f"`{RESULTS}` processed successfully"
     with open(GRADESCOPE_RESULTS, 'w') as output:
-        json.dump({"score": 0, "leaderboard": entries}, output)
+        json.dump({"score": 0, "output": msg, "leaderboard": entries}, output)
