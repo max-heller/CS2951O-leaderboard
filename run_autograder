@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+
+import json
+import os.path
+import sys
+
+SUBMISSION = "/autograder/submission"
+COMPILE = "compile.sh"
+RUN = "run.sh"
+RUN_ALL = "runAll.sh"
+RESULTS = "results.log"
+REPORT = "report.pdf"
+TEAM = "team.txt"
+FILES = [COMPILE, RUN, RUN_ALL, RESULTS, REPORT, TEAM]
+
+GRADESCOPE_RESULTS = "/autograder/results/results.json"
+
+INSTANCE = "Instance"
+RESULT = "Result"
+TIME = "Time"
+SOLUTION = "Solution"
+
+def report_error(msg: str):
+    with open(GRADESCOPE_RESULTS, 'w') as output:
+        json.dump({"score": 0, "output": msg}, output)
+    sys.exit(0)
+
+if __name__ == '__main__':
+    if not os.path.exists(os.path.join(SUBMISSION, RESULTS)):
+        report_error(f"Submission is missing `{RESULTS}`")
+
+    total_time = 0
+    entries = []
+
+    with open(os.path.join(SUBMISSION, RESULTS), 'r') as results:
+        for line in results.readlines():
+            result = json.loads(line)
+            for component in [INSTANCE, RESULT, TIME]:
+                if component not in result:
+                    report_error(f"Line in `{RESULTS}` missing component `{component}`: {line}")
+            time = result[TIME]
+            entries.append({
+                "name": result[INSTANCE],
+                "value": f"{result[RESULT]} [{time}]",
+            })
+            try:
+                total_time += float(time)
+            except:
+                pass
+        
+    entries.insert(0, {"name": "Total time", "value": total_time, "order": "asc"})
+    
+    with open(GRADESCOPE_RESULTS, 'w') as output:
+        json.dump({"score": 0, "leaderboard": entries}, output)
